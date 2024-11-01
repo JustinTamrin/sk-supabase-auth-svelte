@@ -1,9 +1,11 @@
-import { supabaseClient } from '$lib/supabase';
 import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals }) => {
-	const {
-		data: { session }
-	} = await supabaseClient.auth.getSession();
-	return { session };
+	console.log('Ran layout load');
+
+	// Since we already have the session in locals from our hooks.server.ts,
+	// we can just return it directly
+	return {
+		session: locals.session
+	};
 };

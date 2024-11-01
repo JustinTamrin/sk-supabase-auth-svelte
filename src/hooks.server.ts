@@ -1,14 +1,26 @@
-import { supabaseClient } from '$lib/supabase';
+import { createSupabaseServerClient } from '@supabase/auth-helpers-sveltekit';
 import type { Handle } from '@sveltejs/kit';
+import { PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY } from '$env/static/public';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	// Directly use supabaseClient for your operations
+	const supabase = createSupabaseServerClient({
+		supabaseUrl: PUBLIC_SUPABASE_URL,
+		supabaseKey: PUBLIC_SUPABASE_ANON_KEY,
+		event
+	});
+
 	const {
 		data: { session }
-	} = await supabaseClient.auth.getSession();
+	} = await supabase.auth.getSession();
 
-	event.locals.sb = supabaseClient;
+	event.locals.sb = supabase;
 	event.locals.session = session;
 
-	return resolve(event);
+	const response = await resolve(event, {
+		filterSerializedResponseHeaders: (name) => {
+			return name === 'content-range';
+		}
+	});
+
+	return response;
 };
